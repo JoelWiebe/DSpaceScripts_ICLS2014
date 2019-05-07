@@ -15,6 +15,11 @@ import re
 
 #UPDATE VALUES
 
+#filename of volume pdfs
+volumeonefilename = 'ICLS 2014 Volume 1 (PDF)-wCover.pdf'
+volumetwofilename = 'ICLS 2014 Volume 2 (PDF)-wCover.pdf'
+volumethreefilename = 'ICLS 2014 Volume 3 (PDF)-wCover.pdf'
+
 #first page of first paper in the volume
 volumeonestart = 23
 volumetwostart = 625
@@ -107,13 +112,13 @@ for idx, c in enumerate(cs):
         endpage = cs[idx+1][0]
     print("Processing " + str(startpage) + " - " + str(endpage-1) + " pages and volume " + str(c[3]))
     if c[3] == 'Volume 1':
-        fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 1 (PDF)-wCover.pdf', str(startpage+volumeonepageoffset), str(endpage+volumeonepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+        fin = subprocess.run(['/bin/bash', './split.sh', volumeonefilename, str(startpage+volumeonepageoffset), str(endpage+volumeonepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
  
     if c[3] == 'Volume 2':
-        fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 2 (PDF)-wCover.pdf', str(startpage+volumetwopageoffset), str(endpage+volumetwopageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+        fin = subprocess.run(['/bin/bash', './split.sh', volumetwofilename, str(startpage+volumetwopageoffset), str(endpage+volumetwopageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
        
     if c[3] == 'Volume 3':
-         fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 3 (PDF)-wCover.pdf', str(startpage+volumethreepageoffset), str(endpage+volumethreepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+         fin = subprocess.run(['/bin/bash', './split.sh', volumethreefilename, str(startpage+volumethreepageoffset), str(endpage+volumethreepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
    # if startpage == 206:
     fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
     ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
