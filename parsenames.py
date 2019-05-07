@@ -41,6 +41,8 @@ startoflastpaper = 1763
 endofdoc = 1764 
 
 splitPDFs = True
+printfullmetadata = True
+createimportfiles = True
 
 subj = Template(u'<dc:subject xml:lang="en">$subject</dc:subject>')
 def subjects(sstr):
@@ -90,17 +92,24 @@ argv = sys.argv[1:]
 
 try:
     if len(argv) > 0:
-        opts, args = getopt.getopt(argv, "h", ["ns"])
+        opts, args = getopt.getopt(argv, "h", ["ns","nf","ni"])
 
         for opt, arg in opts:
             if opt == '-h':
-                print("parsenames.py [--ns]")
+                print("parsenames.py [--ns] [--nf] [--ni]")
                 sys.exit()
             elif opt == '--ns':
+                print("No splitting of PDFs or converting to text")
                 splitPDFs = False
+            elif opt == '--nf':
+                print("No full metadata file creation")
+                printfullmetadata = False
+            elif opt == '--ni':
+                print("No import files creation")
+                createimportfiles = False
 
 except getopt.GetoptError:
-    print("parsenames.py [--ns]")
+    print("parsenames.py [--ns] [--nf] [--ni]")
 
 f = open('newtoc', 'r').read().strip().split('\n')
 
@@ -126,8 +135,13 @@ for group in g:
 
     cs.append([int(page),title,authors, volume])
 
-print(cs)
+metadatafile = open("rawmetadata.txt","w+")
+metadatafile.write(str(cs))
+print("Created rawmetadata.txt")
+metadatafile.close()
 
+if printfullmetadata:
+    metadatafile = open("fullmetadata.txt","w+")
 for idx, c in enumerate(cs):
     startpage = c[0]
     if startpage == startoflastpaper:
@@ -161,18 +175,23 @@ for idx, c in enumerate(cs):
     authors = makeAuthors(names)
     id = str(startpage)+'-'+str(endpage-1)
     full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]),pages=str(startpage)+'-'+str(endpage-1))
-    #print(full)
-    # dir = 'import/' + id
-    # try:
-    #     os.mkdir(dir)
-    # except:
-    #     pass
-    # xmlf = open(dir + '/dublin_core.xml', 'w')
-    # xmlf.write(full)
-    # open(dir + '/contents', 'w').write(id + '.pdf')
-    # shutil.copyfile('pdfs/'+ id + '.pdf', dir+'/'+id+'.pdf')
 
+    if printfullmetadata:
+        metadatafile.write(str(full))
 
+    if createimportfiles:
+        dir = 'import/' + id
+        try:
+            os.mkdir(dir)
+        except:
+            pass
+        xmlf = open(dir + '/dublin_core.xml', 'w')
+        xmlf.write(full)
+        open(dir + '/contents', 'w').write(id + '.pdf')
+        shutil.copyfile('pdfs/'+ id + '.pdf', dir+'/'+id+'.pdf')
 
+if printfullmetadata:
+    print("Created fullmetadata.txt")
+    metadatafile.close()
     # if startpage == 1763:
     #     break
