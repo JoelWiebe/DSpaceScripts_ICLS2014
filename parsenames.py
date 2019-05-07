@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import getopt
 import shutil
 from nameparser import HumanName
 from string import Template
@@ -35,6 +36,8 @@ startoflastpaper = 1763
 
 #page after last page of last paper of last volume
 endofdoc = 1764 
+
+splitPDFs = True
 
 subj = Template(u'<dc:subject xml:lang="en">$subject</dc:subject>')
 def subjects(sstr):
@@ -80,6 +83,22 @@ item = Template(u"""<?xml version="1.0" encoding="utf-8" standalone="no"?>
     </dublin_core>
 """)
 
+argv = sys.argv[1:]
+
+try:
+    if len(argv) > 0:
+        opts, args = getopt.getopt(argv, "h", ["ns"])
+
+        for opt, arg in opts:
+            if opt == '-h':
+                print("parsenames.py [--ns]")
+                sys.exit()
+            elif opt == '--ns':
+                splitPDFs = False
+
+except getopt.GetoptError:
+    print("parsenames.py [--ns]")
+
 f = open('newtoc', 'r').read().strip().split('\n')
 
 g  =list(zip(*[iter(f)]*2))
@@ -100,6 +119,8 @@ for group in g:
     else:
         raise ValueError("Page number is outside of the provided range", int(page), volumeonestart, endofdoc)
 
+
+
     cs.append([int(page),title,authors, volume])
 
 print(cs)
@@ -110,16 +131,20 @@ for idx, c in enumerate(cs):
         endpage = endofdoc
     else:
         endpage = cs[idx+1][0]
-    print("Processing " + str(startpage) + " - " + str(endpage-1) + " pages and volume " + str(c[3]))
-    if c[3] == 'Volume 1':
-        fin = subprocess.run(['/bin/bash', './split.sh', volumeonefilename, str(startpage+volumeonepageoffset), str(endpage+volumeonepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
- 
-    if c[3] == 'Volume 2':
-        fin = subprocess.run(['/bin/bash', './split.sh', volumetwofilename, str(startpage+volumetwopageoffset), str(endpage+volumetwopageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
-       
-    if c[3] == 'Volume 3':
-         fin = subprocess.run(['/bin/bash', './split.sh', volumethreefilename, str(startpage+volumethreepageoffset), str(endpage+volumethreepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
-   # if startpage == 206:
+
+    if splitPDFs:
+        print("Splitting PDF: page " + str(startpage) + " - " + str(endpage-1) + " from " + str(c[3]))
+        if c[3] == 'Volume 1':
+            fin = subprocess.run(['/bin/bash', './split.sh', volumeonefilename, str(startpage+volumeonepageoffset), str(endpage+volumeonepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+     
+        if c[3] == 'Volume 2':
+            fin = subprocess.run(['/bin/bash', './split.sh', volumetwofilename, str(startpage+volumetwopageoffset), str(endpage+volumetwopageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+           
+        if c[3] == 'Volume 3':
+             fin = subprocess.run(['/bin/bash', './split.sh', volumethreefilename, str(startpage+volumethreepageoffset), str(endpage+volumethreepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+
+
+
     fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
     ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
 
