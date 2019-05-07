@@ -84,7 +84,7 @@ item = Template(u"""<?xml version="1.0" encoding="utf-8" standalone="no"?>
       <dcvalue element="language" qualifier="iso" language="en_US">en</dcvalue>
       <dcvalue element="publisher" qualifier="none" language="en_US">Boulder, CO:&#x20;International&#x20;Society&#x20;of&#x20;the&#x20;Learning&#x20;Sciences</dcvalue>
       <dcvalue element="title" qualifier="none" language="en_US">$title</dcvalue>
-      <dcvalue element="type" qualifier="none" language="en_US">Book&#x20;chapter</dcvalue>
+      <dcvalue element="type" qualifier="none" language="en_US">$type</dcvalue>
     </dublin_core>
 """)
 
@@ -131,9 +131,15 @@ for group in g:
     else:
         raise ValueError("Page number is outside of the provided range", int(page), volumeonestart, endofdoc)
 
+    papertype = None
+    for currpapertype, currpaperstart in papertypeandstart:
+        if int(page) >= currpaperstart:
+            papertype = currpapertype
 
+    if papertype == None:
+        raise valueError ("No paper type was assigned", int(page), title, authors) 
 
-    cs.append([int(page),title,authors, volume])
+    cs.append([int(page),title,authors, volume, papertype])
 
 metadatafile = open("rawmetadata.txt","w+")
 metadatafile.write(str(cs))
@@ -174,7 +180,7 @@ for idx, c in enumerate(cs):
     authorscit = makeAuthorsCit(names)
     authors = makeAuthors(names)
     id = str(startpage)+'-'+str(endpage-1)
-    full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]),pages=str(startpage)+'-'+str(endpage-1))
+    full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]), type=escape(c[4]), pages=str(startpage)+'-'+str(endpage-1))
 
     if printfullmetadata:
         metadatafile.write(str(full))
@@ -190,8 +196,9 @@ for idx, c in enumerate(cs):
         open(dir + '/contents', 'w').write(id + '.pdf')
         shutil.copyfile('pdfs/'+ id + '.pdf', dir+'/'+id+'.pdf')
 
+if createimportfiles:
+    print("Created import files")
+
 if printfullmetadata:
     print("Created fullmetadata.txt")
     metadatafile.close()
-    # if startpage == 1763:
-    #     break
