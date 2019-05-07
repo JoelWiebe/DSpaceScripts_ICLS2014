@@ -21,6 +21,9 @@ volumeonefilename = 'ICLS 2014 Volume 1 (PDF)-wCover.pdf'
 volumetwofilename = 'ICLS 2014 Volume 2 (PDF)-wCover.pdf'
 volumethreefilename = 'ICLS 2014 Volume 3 (PDF)-wCover.pdf'
 
+#list of paper types and their starting pages
+papertypeandstart = [("Papers", 23),("Report and Reflection Papers", 937),("Symposia",1179),("Poster",1481),("Workshops",1677),("Research-Practice Partnership Workshop for Doctoral and Early Career Researchers",1717),("Early Career Workshop",1731),("Doctoral Consortium",1749)]
+
 #first page of first paper in the volume
 volumeonestart = 23
 volumetwostart = 625
@@ -143,9 +146,9 @@ for idx, c in enumerate(cs):
         if c[3] == 'Volume 3':
              fin = subprocess.run(['/bin/bash', './split.sh', volumethreefilename, str(startpage+volumethreepageoffset), str(endpage+volumethreepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
 
+        fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
 
 
-    fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
     ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
 
     match = re.match(r".*Abstract[:.](.+?)ZZZZZZZZ", ff, re.MULTILINE)
