@@ -13,6 +13,24 @@ from xml.sax.saxutils import escape
 from itertools import zip_longest
 import re
 
+#UPDATE VALUES
+
+#first page of first paper in the volume
+volumeonestart = 23
+volumetwostart = 625
+volumethreestart = 1179
+
+#pdf page number minus written page number
+volumeonepageoffset = 40
+volumetwopageoffset = -582
+volumethreepageoffset = -1136
+
+#first page of last paper of last volume
+startoflastpaper = 1763
+
+#page after last page of last paper of last volume
+endofdoc = 1764 
+
 subj = Template(u'<dc:subject xml:lang="en">$subject</dc:subject>')
 def subjects(sstr):
     s = sstr.split(',')
@@ -68,32 +86,34 @@ for group in g:
     title = fline.groups(1)[0].strip()
     page = fline.groups(1)[1].strip()
     authors = group[1].replace("\r", "").strip()
-    volume = 'Volume 1'
-    if int(page) >= 625:
+    if int(page) >= volumeonestart and int(page) < volumetwostart:
+        volume = 'Volume 1'
+    elif int(page) >= volumetwostart and int(page) < volumethreestart:
         volume = 'Volume 2'
-    if int(page) >= 1179:
+    elif int(page) >= volumethreestart and int(page) < endofdoc:
         volume = 'Volume 3'
-    
+    else:
+        raise ValueError("Page number is outside of the provided range", int(page), volumeonestart, endofdoc)
+
     cs.append([int(page),title,authors, volume])
 
 print(cs)
 
-print(enumerate(cs))
 for idx, c in enumerate(cs):
     startpage = c[0]
-    if startpage == 1763:
-        endpage = 1764
+    if startpage == startoflastpaper:
+        endpage = endofdoc
     else:
         endpage = cs[idx+1][0]
-    print("Processing " + str(startpage) + " - " + str(endpage) + " pages and volume " + str(c[3]))
+    print("Processing " + str(startpage) + " - " + str(endpage-1) + " pages and volume " + str(c[3]))
     if c[3] == 'Volume 1':
-        fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 1 (PDF)-wCover.pdf', str(startpage+40), str(endpage+39),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+        fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 1 (PDF)-wCover.pdf', str(startpage+volumeonepageoffset), str(endpage+volumeonepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
  
     if c[3] == 'Volume 2':
-        fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 2 (PDF)-wCover.pdf', str(startpage-582), str(endpage-583),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+        fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 2 (PDF)-wCover.pdf', str(startpage+volumetwopageoffset), str(endpage+volumetwopageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
        
     if c[3] == 'Volume 3':
-         fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 3 (PDF)-wCover.pdf', str(startpage-1136), str(endpage-1137),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
+         fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 3 (PDF)-wCover.pdf', str(startpage+volumethreepageoffset), str(endpage+volumethreepageoffset-1),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
    # if startpage == 206:
     fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
     ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
@@ -108,7 +128,7 @@ for idx, c in enumerate(cs):
     authors = makeAuthors(names)
     id = str(startpage)+'-'+str(endpage-1)
     full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]),pages=str(startpage)+'-'+str(endpage-1))
-    print(full)
+    #print(full)
     # dir = 'import/' + id
     # try:
     #     os.mkdir(dir)
