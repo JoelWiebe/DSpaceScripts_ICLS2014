@@ -95,20 +95,20 @@ for idx, c in enumerate(cs):
     if c[3] == 'Volume 3':
          fin = subprocess.run(['/bin/bash', './split.sh', 'ICLS 2014 Volume 3 (PDF)-wCover.pdf', str(startpage-1136), str(endpage-1137),'pdfs/' + str(startpage) + '-' + str(endpage-1) + '.pdf'])
    # if startpage == 206:
-   # fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
-   # ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
+    fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
+    ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
 
-   # match = re.match(r".*Abstract[:.](.+?)ZZZZZZZZ", ff, re.MULTILINE)
-   # if match:
-   #     abstract = escape(' '.join(match.groups(1)[0].replace('ZZZZ', ' ').split()))
-   # else:
-   #     abstract = ''
-   # names = c[2].split(',')
-   # authorscit = makeAuthorsCit(names)
-   # authors = makeAuthors(names)
-   # id = str(startpage)+'-'+str(endpage-1)
-   # full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]),pages=str(startpage)+'-'+str(endpage-1))
-   # print(full)
+    match = re.match(r".*Abstract[:.](.+?)ZZZZZZZZ", ff, re.MULTILINE)
+    if match:
+        abstract = escape(' '.join(match.groups(1)[0].replace('ZZZZ', ' ').split()))
+    else:
+        abstract = ''
+    names = c[2].split(',')
+    authorscit = makeAuthorsCit(names)
+    authors = makeAuthors(names)
+    id = str(startpage)+'-'+str(endpage-1)
+    full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]),pages=str(startpage)+'-'+str(endpage-1))
+    print(full)
     # dir = 'import/' + id
     # try:
     #     os.mkdir(dir)
