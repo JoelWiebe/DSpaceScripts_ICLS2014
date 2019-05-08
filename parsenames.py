@@ -21,6 +21,11 @@ volumeonefilename = 'ICLS 2014 Volume 1 (PDF)-wCover.pdf'
 volumetwofilename = 'ICLS 2014 Volume 2 (PDF)-wCover.pdf'
 volumethreefilename = 'ICLS 2014 Volume 3 (PDF)-wCover.pdf'
 
+#volume names
+volumeonename = 'Volume 1'
+volumetwoname = 'Volume 2'
+volumethreename = 'Volume 3'
+
 #list of paper types and their starting pages
 papertypeandstart = [("Papers", 23),("Report and Reflection Papers", 937),("Symposia",1179),("Poster",1481),("Workshops",1677),("Research-Practice Partnership Workshop for Doctoral and Early Career Researchers",1717),("Early Career Workshop",1731),("Doctoral Consortium",1749)]
 
@@ -43,6 +48,24 @@ endofdoc = 1764
 splitPDFs = True
 printfullmetadata = True
 createimportfiles = True
+
+#the registrant created suffix used prior to the id; conference + year (e.g. cscl2014)
+doisuffix = "icls2014"
+
+#conference year
+conferenceyear = 2014
+
+#list of editors for citation; get this from the proceedings citation recommendation
+editors = "Polman, J. L., Kyza, E. A., O'Neill, D. K., Tabak, I., Penuel, W. R., Jurow, A. S., O'Connor, K., Lee, T., and D'Amico, L."
+
+#publisher location used for citation
+conferencelocation = "Boulder, CO"
+
+#date that the conference took place in the format yyyy-mm
+issued = "2014-06"
+
+#title of conference with conference acronym and year
+conferencetitle = "Learning and Becoming in Practice: The International Conference of the Learning Sciences (ICLS) 2014"
 
 subj = Template(u'<dc:subject xml:lang="en">$subject</dc:subject>')
 def subjects(sstr):
@@ -77,12 +100,12 @@ item = Template(u"""<?xml version="1.0" encoding="utf-8" standalone="no"?>
     $authors
       <dcvalue element="date" qualifier="accessioned">$datetime</dcvalue>
       <dcvalue element="date" qualifier="available">$datetime</dcvalue>
-      <dcvalue element="date" qualifier="issued">2014-06</dcvalue>
-      <dcvalue element="identifier" qualifier="citation" language="en_US">$authorscit&#x20;(2014).&#x20;$title.&#x20;In&#x20;Joseph&#x20;L.&#x20;Polman,&#x20;Eleni&#x20;A.&#x20;Kyza,&#x20;D.&#x20;Kevin&#x20;O'Neill,&#x20;Iris&#x20;Tabak,&#x20;William&#x20;R.&#x20;Penuel,&#x20;A.&#x20;Susan&#x20;Jurow,&#x20;Kevin&#x20;O'Connor,&#x20;Tiffany&#x20;Lee,&#x20;and&#x20;Laura&#x20;D'Amico&#x20;(Eds.).&#x20;Learning&#x20;and&#x20;Becoming&#x20;in&#x20;Practice:&#x20;The&#x20;International&#x20;Conference&#x20;of&#x20;the&#x20;Learning&#x20;Sciences&#x20;(ICLS)&#x20;2014.&#x20;$volume.&#x20;Colorado,&#x20;CO:&#x20;International&#x20;Society&#x20;of&#x20;the&#x20;Learning&#x20;Sciences,&#x20;pp.&#x20;$pages.</dcvalue>
-      <dcvalue element="identifier" qualifier="uri">https://doi.dx.org&#x2F;10.22318&#x2F;icls2014.$id</dcvalue>
+      <dcvalue element="date" qualifier="issued">$issued</dcvalue>
+      <dcvalue element="identifier" qualifier="citation" language="en_US">$authorscit&#x20;($conferenceyear).&#x20;$title.&#x20;In&#x20;$editors&#x20;(Eds.),&#x20;$conferencetitle,&#x20;$volume&#x20;(pp.&#x20;$pages).&#x20;$conferencelocation:&#x20;International&#x20;Society&#x20;of&#x20;the&#x20;Learning&#x20;Sciences.</dcvalue>
+      <dcvalue element="identifier" qualifier="uri">https://doi.dx.org&#x2F;10.22318&#x2F;$doisuffix.$id</dcvalue>
       <dcvalue element="description" qualifier="abstract" language="en_US">$abstract</dcvalue>
       <dcvalue element="language" qualifier="iso" language="en_US">en</dcvalue>
-      <dcvalue element="publisher" qualifier="none" language="en_US">Boulder, CO:&#x20;International&#x20;Society&#x20;of&#x20;the&#x20;Learning&#x20;Sciences</dcvalue>
+      <dcvalue element="publisher" qualifier="none" language="en_US">$conferencelocation:&#x20;International&#x20;Society&#x20;of&#x20;the&#x20;Learning&#x20;Sciences</dcvalue>
       <dcvalue element="title" qualifier="none" language="en_US">$title</dcvalue>
       <dcvalue element="type" qualifier="none" language="en_US">$type</dcvalue>
     </dublin_core>
@@ -123,11 +146,11 @@ for group in g:
     page = fline.groups(1)[1].strip()
     authors = group[1].replace("\r", "").strip()
     if int(page) >= volumeonestart and int(page) < volumetwostart:
-        volume = 'Volume 1'
+        volume = volumeonename
     elif int(page) >= volumetwostart and int(page) < volumethreestart:
-        volume = 'Volume 2'
+        volume = volumetwoname
     elif int(page) >= volumethreestart and int(page) < endofdoc:
-        volume = 'Volume 3'
+        volume = volumethreename
     else:
         raise ValueError("Page number is outside of the provided range", int(page), volumeonestart, endofdoc)
 
@@ -180,7 +203,7 @@ for idx, c in enumerate(cs):
     authorscit = makeAuthorsCit(names)
     authors = makeAuthors(names)
     id = str(startpage)+'-'+str(endpage-1)
-    full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]), type=escape(c[4]), pages=str(startpage)+'-'+str(endpage-1))
+    full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]), type=escape(c[4]), pages=str(startpage)+'-'+str(endpage-1), doisuffix=doisuffix, conferenceyear=conferenceyear, editors=editors, conferencelocation=conferencelocation, issued=issued, conferencetitle=conferencetitle)
 
     if printfullmetadata:
         metadatafile.write(str(full))
