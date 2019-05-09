@@ -10,7 +10,6 @@ import datetime
 import os
 import subprocess
 from xml.sax.saxutils import escape
-
 from itertools import zip_longest
 import re
 
@@ -191,21 +190,23 @@ for idx, c in enumerate(cs):
 
         fin = subprocess.run(['pdftotext', '-simple', 'pdfs/'+ str(startpage)+'-'+ str(endpage-1)+'.pdf'])
 
-
-    ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
-
-    match = re.match(r".*Abstract[:.](.+?)ZZZZZZZZ", ff, re.MULTILINE)
-    if match:
-        abstract = escape(' '.join(match.groups(1)[0].replace('ZZZZ', ' ').split()))
-    else:
-        abstract = ''
-    names = c[2].split(',')
-    authorscit = makeAuthorsCit(names)
-    authors = makeAuthors(names)
-    id = str(startpage)+'-'+str(endpage-1)
-    full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]), type=escape(c[4]), pages=str(startpage)+'-'+str(endpage-1), doisuffix=doisuffix, conferenceyear=conferenceyear, editors=editors, conferencelocation=conferencelocation, issued=issued, conferencetitle=conferencetitle)
-
     if printfullmetadata:
+
+        ff = open('pdfs/'+ str(startpage)+"-"+ str(endpage-1)+'.txt', 'rb').read().decode('utf8', 'ignore').strip().replace('\n','ZZZZ')
+
+        match = re.match(r".*Abstract[:.](.+?)ZZZZZZZZ", ff, re.MULTILINE)
+
+        if match:
+            abstract = escape(' '.join(match.groups(1)[0].replace('ZZZZ', ' ').split()))
+        else:
+            abstract = ''
+
+        names = c[2].split(',')
+        authorscit = makeAuthorsCit(names)
+        authors = makeAuthors(names)
+        id = str(startpage)+'-'+str(endpage-1)
+        full = item.substitute(authors=authors, authorscit=authorscit, title=escape(c[1]), datetime=genDatetime(),id=str(startpage), abstract=escape(abstract), volume=escape(c[3]), type=escape(c[4]), pages=str(startpage)+'-'+str(endpage-1), doisuffix=doisuffix, conferenceyear=conferenceyear, editors=editors, conferencelocation=conferencelocation, issued=issued, conferencetitle=conferencetitle)
+    
         metadatafile.write(str(full))
 
     if createimportfiles:
