@@ -26,7 +26,7 @@ volumetwoname = 'Volume 2'
 volumethreename = 'Volume 3'
 
 #list of paper types and their starting pages
-papertypeandstart = [("Papers", 23),("Report and Reflection Papers", 937),("Symposia",1179),("Poster",1481),("Workshops",1677),("Research-Practice Partnership Workshop for Doctoral and Early Career Researchers",1717),("Early Career Workshop",1731),("Doctoral Consortium",1749)]
+papertypeandstart = [("Papers", 21),("Report and Reflection Papers", 935),("Symposia",1177),("Poster",1479),("Workshops",1675),("Research-Practice Partnership Workshop for Doctoral and Early Career Researchers",1712),("Early Career Workshop",1728),("Doctoral Consortium",1747)]
 
 #first page of first paper in the volume
 volumeonestart = 23
@@ -176,6 +176,11 @@ for idx, c in enumerate(cs):
         endpage = endofdoc
     else:
         endpage = cs[idx+1][0]
+
+        #Update endpage if there is a section header between papers
+        for currpapertype, currpaperstart in papertypeandstart:
+            if startpage < currpaperstart and currpaperstart < endpage:
+                endpage = currpaperstart
 
     if splitPDFs:
         print("Splitting PDF: page " + str(startpage) + " - " + str(endpage-1) + " from " + str(c[3]))
